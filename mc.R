@@ -1,94 +1,97 @@
-count_scale <- read.csv("C://ISBD/bicluster code/0228/count_scale.csv")
-count_scale <- as.matrix(count_scale[,-1])
+#count_scale <- read.csv("C://ISBD/bicluster code/0228/count_scale.csv")
+#count_scale <- as.matrix(count_scale[,-1])
 
-kr <- read.csv("C://ISBD/bicluster code/0228/kr.csv")
-kr <- kr$x
-kr <- na.omit(kr)
-kc <- read.csv("C://ISBD/bicluster code/0228/kc.csv")
-kc <- kc$x
+#kr <- read.csv("kr.csv")
+#kr <- kr$x
+#kr <- na.omit(kr)
+#kc <- read.csv("kc.csv")
+#kc <- kc$x
 
-brain_mat <- count_scale[kr,kc]
+#brain_mat <- count_scale[kr,kc]
 
-brain_mat <- read.csv("C://ISBD/bicluster code/0228/brain_mat.csv")
-brain_mat <- as.matrix(brain_mat[,-1])
+#brain_mat <- read.csv("brain_mat.csv")
+#brain_mat <- as.matrix(brain_mat[,-1])
 #brain_mat <- brain_mat[gcd,]
 
-rm(count_scale)
+#rm(count_scale)
 
-id <- read.table("C://ISBD/bicluster code/id.csv")
-id <- id$x
-id <- as.character(id)
-brain_id <- id[kc]
-br_split <- strsplit(brain_id,"-")
-don_br <- unlist(lapply(br_split,function(x){return(x[2])}))
-don_set <- names(table(don_br))
-att <- read.csv("C://ISBD/bicluster code/0228/att.csv")
-att <- att[,-1]
-library(dplyr)
-brain <- filter(att,SMTS=="Brain")
+#id <- read.table("id.csv")
+#id <- id$x
+#id <- as.character(id)
+#brain_id <- id[kc]
+#br_split <- strsplit(brain_id,"-")
+#don_br <- unlist(lapply(br_split,function(x){return(x[2])}))
+#don_set <- names(table(don_br))
+#att <- read.csv("att.csv")
+#att <- att[,-1]
+#library(dplyr)
+#brain <- filter(att,SMTS=="Brain")
 
-att_br <- brain[(match(brain_id,brain$SAMPID)),]
-tis_br <- as.character(att_br$SMTSD)
-tis_set <- names(table(tis_br))
-adj <- function(x){
-  if(length(x)==0) 
-    x <- NA 
-  if(length(x) >0)  
-    x <- min(x)
-  return(x)
-}
-ind_split <- split(1:1259,list(as.factor(don_br),as.factor(tis_br)))
-ind_adj <- lapply(ind_split, adj)
-ind_vec <- as.numeric(unlist(ind_adj))
-ind_mat <- matrix(ind_vec,nrow = 193)
-sub_att <- read.csv("C://ISBD/bicluster code/0228/sub_att.csv")
-sub_att <- sub_att[,-1]
-subsplit  <- strsplit(as.character(sub_att$SUBJID),"-")
-subid <- unlist(lapply(subsplit,function(x){return(x[2])}))
+#att_br <- brain[(match(brain_id,brain$SAMPID)),]
+#tis_br <- as.character(att_br$SMTSD)
+#tis_set <- names(table(tis_br))
+#adj <- function(x){
+#  if(length(x)==0) 
+#    x <- NA 
+#  if(length(x) >0)  
+#    x <- min(x)
+#  return(x)
+#}
+#ind_split <- split(1:1259,list(as.factor(don_br),as.factor(tis_br)))
+#ind_adj <- lapply(ind_split, adj)
+#ind_vec <- as.numeric(unlist(ind_adj))
+#ind_mat <- matrix(ind_vec,nrow = 193)
+#sub_att <- read.csv("sub_att.csv")
+#sub_att <- sub_att[,-1]
+#subsplit  <- strsplit(as.character(sub_att$SUBJID),"-")
+#subid <- unlist(lapply(subsplit,function(x){return(x[2])}))
 
-subbr_att <- sub_att[match(don_set,subid),]
-subbr_att$AGE <- as.character(subbr_att$AGE)
+#subbr_att <- sub_att[match(don_set,subid),]
+#subbr_att$AGE <- as.character(subbr_att$AGE)
 
-subbr_att$AGE[subbr_att$AGE=="20-29"] <- 1
+#subbr_att$AGE[subbr_att$AGE=="20-29"] <- 1
 
-subbr_att$AGE[subbr_att$AGE=="30-39"] <- 2
-subbr_att$AGE[subbr_att$AGE=="40-49"] <- 3
+#subbr_att$AGE[subbr_att$AGE=="30-39"] <- 2
+#subbr_att$AGE[subbr_att$AGE=="40-49"] <- 3
 
-subbr_att$AGE[subbr_att$AGE=="50-59"] <- 4
-subbr_att$AGE[subbr_att$AGE=="60-69"] <- 5
-subbr_att$AGE[subbr_att$AGE=="70-79"] <- 6
+#subbr_att$AGE[subbr_att$AGE=="50-59"] <- 4
+#subbr_att$AGE[subbr_att$AGE=="60-69"] <- 5
+#subbr_att$AGE[subbr_att$AGE=="70-79"] <- 6
 
-subbr_att <- subbr_att[,-1]
-subbr_att$AGE <- as.integer(subbr_att$AGE)
+#subbr_att <- subbr_att[,-1]
+#subbr_att$AGE <- as.integer(subbr_att$AGE)
 
 
-kg <- nrow(brain_mat)
-farray <- function(x){
-  if(is.na(x)==1)
-    return(rep(NA,kg))
-  else
-    return(brain_mat[,x])
-}
-brain_array <- apply(ind_mat, c(1,2), farray)
-brain_array <- aperm(brain_array,c(2,3,1))
+#kg <- nrow(brain_mat)
+#farray <- function(x){
+#  if(is.na(x)==1)
+#    return(rep(NA,kg))
+#  else
+#    return(brain_mat[,x])
+#}
+#brain_array <- apply(ind_mat, c(1,2), farray)
+#brain_array <- aperm(brain_array,c(2,3,1))
 
-library(caret)
-for(i in 1:13){
-  for(j in 1:nrow(brain_mat)){
-    teid <- which(is.na(brain_array[,i,j]))
-    if(length(teid)>0){
-      trainx <- subbr_att[-teid,-3]
-      trainy <- brain_array[-teid,i,j]
-      testx <- subbr_att[teid,-3]
-      testy <- knnregTrain(trainx, testx, trainy, k = 10, use.all = TRUE)
-      brain_array[teid,i,j] <- testy
-    }
-    
-  }
-}
+#library(caret)
+#for(i in 1:13){
+#  for(j in 1:nrow(brain_mat)){
+#    teid <- which(is.na(brain_array[,i,j]))
+#    if(length(teid)>0){
+#      trainx <- subbr_att[-teid,-3]
+#      trainy <- brain_array[-teid,i,j]
+#      testx <- subbr_att[teid,-3]
+#      testy <- knnregTrain(trainx, testx, trainy, k = 10, use.all = TRUE)
+#      brain_array[teid,i,j] <- testy
+#    }
+#  }
+#}
 
-brain_array <- log(brain_array+1)
-brain_array <- brain_array-mean(brain_array)
+#brain_array <- log(brain_array+1)
+#brain_array <- brain_array-mean(brain_array)
+
+bv <- read.csv("brain_array.csv")
+bv <- bv$x
+brain_array <- array(bv,dim = c(193,13,383))
 
 test <-c(1,8,18,23,26,27,29,31)
 y <- brain_array[,,gcd]
