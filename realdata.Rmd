@@ -42,12 +42,10 @@ inf <- id[ind]
 inf
 ```
 
-
 ```{r}
 tt
 
 ```
-
 
 ```{r}
 td
@@ -109,6 +107,7 @@ keep_row <- which(rowSums(count_scale)/8555>=500)
 
 count_adj <- count_scale[keep_row,keep_col]
 ```
+
 ```{r}
 tissue_adj <- id_tissue[keep_col]
 donor_adj <- id_donor[keep_col]
@@ -117,6 +116,7 @@ donor_adj <- id_donor[keep_col]
 ```{r}
 table(tissue_adj)
 ```
+
 ```{r}
 tissue0126 <- which(tissue_adj=="0126")
 tissue0226 <- which(tissue_adj=="0226")
@@ -128,8 +128,6 @@ tissue0726 <- which(tissue_adj=="0726")
 tissue0826 <- which(tissue_adj=="0826")
 tissue0926 <- which(tissue_adj=="0926")
 ```
-
-
 
 ```{r}
 kg <- 12092
@@ -146,7 +144,6 @@ sum(is.na(count_array))
 ```{r}
 head(count_adj)
 ```
-
 
 --------Deal with brain data--------
 
@@ -170,11 +167,14 @@ att <- fread("https://storage.googleapis.com/gtex_analysis_v6/annotations/GTEx_D
 library(dplyr)
 brain <- filter(att,SMTS=="Brain")
 ```
+
 ```{r}
 head(brain)
 ```
 
 ```{r}
+id <- read.table("id.csv")
+id <- id$x
 brain_id <-id[which(!is.na(match(id,brain$SAMPID)))]
 br_split <- strsplit(brain_id,"-")
 don_br <- unlist(lapply(br_split,function(x){return(x[2])}))
@@ -183,7 +183,6 @@ att_br <- brain[(match(brain_id,brain$SAMPID)),]
 tis_br <- att_br$SMTSD
 tis_set <- names(table(tis_br))
 ```
-
 
 ```{r}
 brain_mat <- read_count[,which(!is.na(match(id,brain$SAMPID)))]
@@ -221,7 +220,6 @@ farray <- function(x){
 brain_array <- apply(ind_mat, c(1,2), farray)
 brain_array <- aperm(brain_array,c(2,3,1))
 ```
-
 
 ```{r}
 library(data.table)
@@ -510,12 +508,13 @@ table(kclass)
 ```{r}
 
 kclass <- vector()
-for(i in 8001:10000){
+for(i in 5001:10000){
   kclass[i] <- ncol(c1track[[i]])
 }
 plot(kclass)
 table(kclass)
 ```
+
 ```{r}
 tis_li <- strsplit(tis_set,"-")
 tis_set2 <- unlist(lapply(tis_li,function(x){return(x[2])}))
@@ -536,7 +535,6 @@ colnames(c2) <- c("class1","class2","class3","class4","class5","class6")#,"class
 colnames(c3) <- c("class1","class2","class3","class4","class5","class6")#,"class7","class8","class9","class10","class11","class12")
 ```
 
-
 ```{r}
 library(dplyr)
 br_att <- cbind(don_set,subbr_att)
@@ -544,8 +542,6 @@ a <- arrange(br_att,GENDER,AGE,DTHHRDY)
 don_arr <- a$don_set
 
 ```
-
-
 
 ```{r}
 ind6 <- which(unlist(lapply(c1track, function(x){ncol(x)}))==6)
@@ -586,9 +582,9 @@ c1ppp <- matrix(c1ppp,nrow = d[1],ncol = kl)
 ```
 
 ```{r}
-kl <- 8
+kl <- 5
 #kclass <- vector()
-c2left <- c2track[which(kclass==kl)]
+c2left <- c2track[1:1000]
 c2pp <- matrix(0,nrow = d[2]*kl,ncol = sum(na.omit(kclass==kl)))
 for(t in 1:length(c2left)){
  # kclass[i] <- ncol(c1track[[i]])
@@ -599,12 +595,10 @@ c2ppp <- apply(c2pp, 1, function(x){as.numeric(names(table(x))[table(x) == max(t
 c2ppp <- matrix(c2ppp,nrow = d[2],ncol = kl)
 ```
 
-
 ```{r}
 c1_arr <- c1ppp[match(don_arr,don_set),]
 c1_arr <- c1p[match(don_arr,don_set),]
 ```
-
 
 ```{r}
 rownames(c1_arr) <- don_arr
@@ -612,25 +606,25 @@ rownames(c2ppp) <- tis_set
 rownames(c3ppp) <- tar_gene1
 ```
 
-
 ```{r}
 don_arr <- don_set
 rownames(c1) <- don_arr
-rownames(c2) <- tis_set
+rownames(c2n) <- tis_set
 name_genedel3 <- gcgene[-del]
 name_genedel3 <- name_genedel3[-del2]
 name_genedel3 <- name_genedel3[-del3]
-rownames(c3) <- name_genedel3
-
+rownames(c3) <- genefo
+rownames(c3n) <- dep_gene
 ```
 
 ```{r}
 library(reshape2)
 #pc2o = melt(t(c1o), varnames = c("Factor", "secondorder"), value.name = "Indicator")
-pc1p = melt(t(c1), varnames = c("Factor", "secondorder"), value.name = "Indicator")
+pc1p = melt(t(c1n), varnames = c("Factor", "secondorder"), value.name = "Indicator")
 ```
 
 ```{r}
+library(ggplot2)
 #ggplot2::ggplot(pc2o, aes(x = secondorder, y = Factor)) + geom_tile(aes(fill = Indicator), color = "black") +
  # scale_fill_gradient(low = "black", high = "green") + theme(legend.position = "none") +
   #scale_x_discrete(expand = c(0, 0)) + scale_y_discrete(expand = c(0, 0)) + labs(x = "", y = "")
@@ -639,10 +633,11 @@ ggplot2::ggplot(pc1p, aes(x = secondorder, y = Factor)) + geom_tile(aes(fill = I
   scale_x_discrete(expand = c(0, 0),guide = guide_axis(n.dodge=10)) + scale_y_discrete(expand = c(0, 0)) + labs(x = "", y = "")
 
 ```
+
 ```{r}
 library(reshape2)
 #pc2o = melt(t(c1o), varnames = c("Factor", "secondorder"), value.name = "Indicator")
-pc2p = melt(t(c2), varnames = c("Factor", "secondorder"), value.name = "Indicator")
+pc2p = melt(t(c2n), varnames = c("Factor", "secondorder"), value.name = "Indicator")
 ```
 
 ```{r}
@@ -653,11 +648,11 @@ ggplot2::ggplot(pc2p, aes(x = secondorder, y = Factor)) + geom_tile(aes(fill = I
   scale_fill_gradient(low = "black", high = "green") + theme(legend.position = "none") +
   scale_x_discrete(expand = c(0, 0),guide = guide_axis(n.dodge=5)) + scale_y_discrete(expand = c(0, 0)) + labs(x = "", y = "")
 ```
+
 ```{r}
 #pc3o = melt(t(c3o), varnames = c("Factor", "thirdorder"), value.name = "Indicator")
-pc3ppp = melt(t(c3), varnames = c("Factor", "thirdorder"), value.name = "Indicator")
+pc3ppp = melt(t(c3n), varnames = c("Factor", "thirdorder"), value.name = "Indicator")
 ```
-
 
 ```{r}
 #ggplot2::ggplot(pc3o, aes(x = thirdorder, y = Factor)) + geom_tile(aes(fill = Indicator), color = "black") +
@@ -667,6 +662,7 @@ ggplot2::ggplot(pc3ppp, aes(x = thirdorder, y = Factor)) + geom_tile(aes(fill = 
   scale_fill_gradientn(colors = c("red", "black", "green"), breaks = c(-1, 0, 1)) + theme(legend.position = "none") +
   scale_x_discrete(expand = c(0, 0)) + scale_y_discrete(expand = c(0, 0)) + labs(x = "", y = "")
 ```
+
 ```{r}
 library(reshape2)
 #pc2o = melt(t(c1o), varnames = c("Factor", "secondorder"), value.name = "Indicator")
@@ -748,7 +744,6 @@ ggplot2::ggplot(pc2p, aes(x = secondorder, y = Factor)) + geom_tile(aes(fill = I
 pc3p = melt(t(c3), varnames = c("Factor", "thirdorder"), value.name = "Indicator")
 ```
 
-
 ```{r}
 #ggplot2::ggplot(pc3o, aes(x = thirdorder, y = Factor)) + geom_tile(aes(fill = Indicator), color = "black") +
  # scale_fill_gradientn(colors = c("red", "black", "green"), breaks = c(-1, 0, 1)) + theme(legend.position = "none") +
@@ -762,7 +757,6 @@ ggplot2::ggplot(pc3p, aes(x = thirdorder, y = Factor)) + geom_tile(aes(fill = In
 #pc3o = melt(t(c3o), varnames = c("Factor", "thirdorder"), value.name = "Indicator")
 pc3ppp = melt(t(c3ppp), varnames = c("Factor", "thirdorder"), value.name = "Indicator")
 ```
-
 
 ```{r}
 #ggplot2::ggplot(pc3o, aes(x = thirdorder, y = Factor)) + geom_tile(aes(fill = Indicator), color = "black") +
@@ -788,7 +782,6 @@ ggplot2::ggplot(pc3p, aes(x = thirdorder, y = Factor)) + geom_tile(aes(fill = In
   scale_fill_gradientn(colors = c("red", "black", "green"), breaks = c(-1, 0, 1)) + theme(legend.position = "none") +
   scale_x_discrete(expand = c(0, 0)) + scale_y_discrete(expand = c(0, 0)) + labs(x = "", y = "")
 ```
-
 
 ```{r}
 c2_del <- c2[,-del]
@@ -822,7 +815,6 @@ ggplot2::ggplot(pc1p, aes(x = secondorder, y = Factor)) + geom_tile(aes(fill = I
 
 ```
 
-
 ```{r}
 set.seed(1)
 c <- matrix(0,nrow = 10,ncol = 3)
@@ -836,7 +828,7 @@ for(i in 1:3){
 ```
 
 ```{r}
-ishgene <- read.table("C://ISBD/bicluster code/0220/gene.txt",sep="\t",quote = "")
+ishgene <- read.table("gene.txt",sep="\t",quote = "")
 genetable <- sort(table(ishgene$V1))
 brain_gene <- names(table(ishgene$V1))
 brain_gene <- brain_gene[-c(26,185,214)]
@@ -847,7 +839,7 @@ rownames(brain_mat) <- targene3
 
 keeprow2 <- which((rowMeans(brain_mat)<1e4) &(rowMeans(brain_mat)>1e3))
 brain_mat <- brain_mat[keeprow2,]
-name_gene <- read.csv("C://ISBD/bicluster code/0228/namegene.csv")
+name_gene <- read.csv("namegene.csv")
 name_gene <- name_gene$x
 ```
 
@@ -867,7 +859,6 @@ alzd <- na.omit(alzd)
 alzd <- which(!is.na(match(kr,alzd)))
 ```
 
-
 ```{r}
 indg <- match(brain_gene,name_gene)
 brain_scale <- matrix(nrow = length(brain_gene),ncol = 8555)
@@ -876,7 +867,9 @@ for(i in length(brain_gene)){
 }
 
 ```
+
 ----normalization----
+
 ```{r}
 brain_mat <- as.matrix(brain_data)
 brain_mat <- as.matrix(brain_mat)
@@ -887,7 +880,6 @@ sf <- sizeFactors(dds)
 brain_scale <- t(t(brain_mat)/sf)
 brain_mat <- brain_scale
 ```
-
 
 ```{r}
 library(EDISON)
@@ -907,6 +899,7 @@ write.csv(kc,"C://ISBD/bicluster code/0228/kc.csv")
 kr <- match(brain_gene,name_gene)
 write.csv(kr,"C://ISBD/bicluster code/0228/kr.csv")
 ```
+
 ```{r}
 heatmap(y[7,,])
 ```
@@ -924,6 +917,7 @@ for(i in 1:8){
 }
 
 ```
+
 ```{r}
 for(i in 1:13){
   heatmap(y[,i,])
@@ -963,7 +957,6 @@ for(i in 1:11){
 }
 ```
 
-
 ```{r}
 parkinson <- read.table("C://ISBD/bicluster code/0317/parkinson.txt",sep="\t",quote = "")
 parkinson <- parkinson$V1
@@ -999,5 +992,39 @@ sd <- which(!is.na(match(kr,sd)))
 y_sig <- brain_array[,,sd]
 for(i in 1:9){
   heatmap(y_sig[,,i],main = paste("gene", signal[i]))
+}
+```
+
+```{r}
+gpro <- read.table("g-protein coupled receptor.txt",sep="\t",quote = "")
+gpro <- gpro$V1
+gd <- match(gpro,name_gene)
+dels <- which(is.na(gd))
+gpro <- gpro[-dels]
+gd <- na.omit(gd)
+gd <- which(!is.na(match(kr,gd)))
+```
+
+```{r}
+y_gpro <- brain_array[,,gd]
+for(i in 1:length(gd)){
+  heatmap(y_gpro[,,i],main = paste("gene", gpro[i]))
+}
+```
+
+```{r}
+genefo <- read.table("depression.txt",sep="\t",quote = "")
+genefo <- genefo$V1
+gened <- match(genefo,name_gene)
+dels <- which(is.na(gened))
+genefo <- genefo[-dels]
+gened <- na.omit(gened)
+gened <- which(!is.na(match(kr,gened)))
+```
+
+```{r}
+y_gf <- brain_array[,,gened]
+for(i in 1:15){
+  heatmap(y[,,i],main = paste("gene", dep_gene[i]))
 }
 ```
