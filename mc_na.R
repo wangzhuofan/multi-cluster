@@ -79,8 +79,8 @@ set.seed(1)
 set.seed(2)
 library(progress)
 pb <- progress_bar$new(format = "  complete [:bar] :percent eta: :eta",
-                       total = 5000, clear = FALSE, width= 60)
-for(it in 5001:10000){
+                       total = 10000, clear = FALSE, width= 60)
+for(it in 1:10000){
   #ztrack[[it]] <- z
   
   
@@ -102,7 +102,7 @@ for(it in 5001:10000){
   lambda1 <- li2[[2]]
   lambda2 <- li2[[3]]
   
-  #m <- rgamma(1,am+r,bm+har(d[1]))
+  m <- rgamma(1,am+r,bm+har(d[1]))
   #m = randg( distr_param(am+r,bm+har(d[0])));
   #//update $\rho$
   #rho <-  rbeta(1,arho+sum(c2),brho+d[2]*r-sum(c2))
@@ -138,14 +138,14 @@ plot(kclass)
 table(kclass)
 
 kclass <- vector()
-for(i in 8001:10000){
+for(i in 5001:10000){
   kclass[i] <- ncol(c1track[[i]])
 }
 plot(kclass)
 table(kclass)
 ##########################################
 
-kl <- 4
+kl <- 5
 c1left <- c1track[which(kclass==kl)]
 c1left <- c1left[10*(1:as.integer(length(c1left)/10))]
 min_ham = function(A, B) {
@@ -259,3 +259,23 @@ for(it in 1:1000){
   Sys.sleep(1/100)
 }
 save.image("multi.RData")
+
+
+library(reshape2)
+library(ggplot2)
+#pc2o = melt(t(c1o), varnames = c("Factor", "secondorder"), value.name = "Indicator")
+pc1p = melt(t(c1), varnames = c("Factor", "secondorder"), value.name = "Indicator")
+pc2p = melt(t(c2), varnames = c("Factor", "secondorder"), value.name = "Indicator")
+pc3p = melt(t(c3), varnames = c("Factor", "thirdorder"), value.name = "Indicator")
+#ggplot2::ggplot(pc2o, aes(x = secondorder, y = Factor)) + geom_tile(aes(fill = Indicator), color = "black") +
+# scale_fill_gradient(low = "black", high = "green") + theme(legend.position = "none") +
+#scale_x_discrete(expand = c(0, 0)) + scale_y_discrete(expand = c(0, 0)) + labs(x = "", y = "")
+ggplot2::ggplot(pc1p, aes(x = secondorder, y = Factor)) + geom_tile(aes(fill = Indicator), color = "black") +
+  scale_fill_gradient(low = "black", high = "green") + theme(legend.position = "none",axis.text.x = element_text(size = 5, angle = 45)) +
+  scale_x_discrete(expand = c(0, 0),guide = guide_axis(n.dodge=10)) + scale_y_discrete(expand = c(0, 0)) + labs(x = "", y = "")
+ggplot2::ggplot(pc2p, aes(x = secondorder, y = Factor)) + geom_tile(aes(fill = Indicator), color = "black") +
+  scale_fill_gradient(low = "black", high = "green") + theme(legend.position = "none",axis.text.x = element_text(size = 5, angle = 45)) +
+  scale_x_discrete(expand = c(0, 0),guide = guide_axis(n.dodge=10)) + scale_y_discrete(expand = c(0, 0)) + labs(x = "", y = "")
+ggplot2::ggplot(pc3p, aes(x = thirdorder, y = Factor)) + geom_tile(aes(fill = Indicator), color = "black") +
+  scale_fill_gradientn(colors = c("red", "black", "green"), breaks = c(-1, 0, 1)) + theme(legend.position = "none") +
+  scale_x_discrete(expand = c(0, 0)) + scale_y_discrete(expand = c(0, 0)) + labs(x = "", y = "")
