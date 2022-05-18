@@ -1,6 +1,6 @@
 #include <iostream>
 #include <RcppArmadillo.h>
-#include <RcppArmadilloExtensions/sample.h>
+//#include <RcppArmadilloExtensions/sample.h>
 using namespace arma;
 using namespace Rcpp;
 using namespace std;

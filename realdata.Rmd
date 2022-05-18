@@ -974,8 +974,14 @@ for(i in 1:13){
 
 ```{r}
 for (i in 1:383) {
-  heatmap(brain_array[,,i],main = paste("gene", brain_gene[i]))
+  heatmap(brain_array[,,i],na.rm = TRUE)
 }
+```
+
+```{r}
+library(mice)
+library(VIM)
+aggr(t(y[,,2]),prop=F,numbers=T)
 ```
 
 ```{r}
@@ -1027,4 +1033,11 @@ y_gf <- brain_array[,,gened]
 for(i in 1:15){
   heatmap(y[,,i],main = paste("gene", dep_gene[i]))
 }
+```
+
+```{r}
+for(i in 1:15){
+  heatmap(y_dep[,,i])
+}
+
 ```
