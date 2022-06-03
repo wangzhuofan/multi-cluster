@@ -4,6 +4,10 @@ y_depna <- array(depression_na,dim = c(193,13,15))
 rm(depression_na)
 dep_gene <- read.csv("depression_name.csv")
 dep_gene <- dep_gene$x
+subbr_att <- read.csv("subbr_att.csv")
+subbr_att <- subbr_att[,-1]
+tis_set <- read.csv("tis_set.csv")
+tis_set <- tis_set$x
 #y <- y_depna
 y <- aperm(y_depna,c(2,1,3))
 rm(y_depna)
@@ -145,7 +149,7 @@ plot(kclass)
 table(kclass)
 ##########################################
 
-kl <- 5
+kl <- 3
 c1left <- c1track[which(kclass==kl)]
 c1left <- c1left[10*(1:as.integer(length(c1left)/10))]
 min_ham = function(A, B) {
@@ -177,7 +181,9 @@ r <-kl
 c1n <- c1p
 set.seed(3)
 {
-  
+  y_pred <-array(0,dim = c(13,193,15))
+  y_pred[which(is.na(y))] <- NA
+  yntrack <- list()
   c2ntrack <- list()
   c3ntrack <- list()
   c2n =matrix(as.numeric(runif(d[2] * r) < 0.5), d[2], r)
@@ -246,36 +252,112 @@ for(it in 1:1000){
   b2n <- li5[[2]]
   #up6 = update_norm(z,y,sigmamu,mu,v1,v2);
   sigma2n <- update_sigma2(zn,y,mu1n,mu2n,mu3n,v1n,v2n)
-  #mu1 <- update_mu1(z,y,sigmamu,sigma2,mu1,mu2,mu3)
-  mu2n <- update_mu2(zn,y,sigmamu,sigma2n,mu1n,mu2n,mu3n)
+  mu1n <- update_mu1(zn,y,sigmamu,sigma2n,mu1n,mu2n,mu3n)
+  #mu2n <- update_mu2(zn,y,sigmamu,sigma2n,mu1n,mu2n,mu3n)
   mu3n <- update_mu3(zn,y,sigmamu,sigma2n,mu1n,mu2n,mu3n)
+  for (i in 1:13) {
+    for(j in 1:193){
+      for(l in 1:15){
+        if(!is.na(zn[i,j,l])){
+          if(zn[i,j,l]==1)
+            y_pred[i,j,l] <- runif(1,mu1n[i]+mu3n[l],mu1n[i]+mu3n[l]+v2n[l])
+          if(zn[i,j,l]==0)
+            y_pred[i,j,l] <- rnorm(1,mu1n[i]+mu3n[l],sqrt(sigma2n[l]))
+          if(zn[i,j,l]==-1)
+            y_pred[i,j,l] <- runif(1,mu1n[i]+mu3n[l]-v1n[l],mu1n[i]+mu3n[l])
+        }
+      }
+    }
+  }
   #result_multi[[it]] <- rbind(c1,c2,c3)
   #c1track[[it]] <- c1
   c2ntrack[[it]] <- c2n
   c3ntrack[[it]] <- c3n
+  yntrack[[it]] <- y_pred
   #b1track[[it]] <- b1
   #b2track[[it]] <- b2
   pb$tick()
   Sys.sleep(1/100)
 }
-save.image("multi.RData")
 
+c2nleft <- c2ntrack[501:1000]
+c3nleft <- c3ntrack[501:1000]
+c2nn <- matrix(0,nrow = d[2]*r,ncol = 500)
+c3nn <- matrix(0,nrow = d[3]*r,ncol = 500)
+for(t in 1:500){
+  # kclass[i] <- ncol(c1track[[i]])
+  c2nn[,t] <- as.vector(c2nleft[[t]])
+  c3nn[,t] <- as.vector(c3nleft[[t]])
+}
+c2np <- apply(c2nn, 1, function(x){mean(x)})
+c3np <- apply(c3nn, 1, function(x){mean(x)})
+#plot(kclass)
+c2np <- matrix(c2np,nrow = d[2],ncol = r)
+c3np <- matrix(c3np,nrow = d[3],ncol = r)
+#save.image("multi.RData")
+a1 <- subbr_att[which(c2np[,1]>0.5),]
+a2 <- subbr_att[which(c2np[,2]>0.5),]
+a3 <- subbr_att[which(c2np[,3]>0.5),]
+library(dplyr)
+table(a1$GENDER)
+table(a1$AGE)
+table(a2$GENDER)
+table(a2$AGE)
+table(a3$GENDER)
+table(a3$AGE)
+
+a1 <- subbr_att[which(c2np[,1]>0),]
+a2 <- subbr_att[which(c2np[,2]>0),]
+a3 <- subbr_att[which(c2np[,3]>0),]
+library(dplyr)
+table(a1$GENDER)
+table(a1$AGE)
+table(a2$GENDER)
+table(a2$AGE)
+table(a3$GENDER)
+table(a3$AGE)
 
 library(reshape2)
 library(ggplot2)
+rownames(c1n) <- tis_set
+rownames(c3np) <- dep_gene
 #pc2o = melt(t(c1o), varnames = c("Factor", "secondorder"), value.name = "Indicator")
-pc1p = melt(t(c1), varnames = c("Factor", "secondorder"), value.name = "Indicator")
-pc2p = melt(t(c2), varnames = c("Factor", "secondorder"), value.name = "Indicator")
-pc3p = melt(t(c3), varnames = c("Factor", "thirdorder"), value.name = "Indicator")
+pc1p = melt(t(c1n), varnames = c("Factor", "firstorder"), value.name = "Indicator")
+pc2p = melt(t(c2np), varnames = c("Factor", "secondorder"), value.name = "Indicator")
+pc3p = melt(t(c3np), varnames = c("Factor", "thirdorder"), value.name = "Indicator")
 #ggplot2::ggplot(pc2o, aes(x = secondorder, y = Factor)) + geom_tile(aes(fill = Indicator), color = "black") +
 # scale_fill_gradient(low = "black", high = "green") + theme(legend.position = "none") +
 #scale_x_discrete(expand = c(0, 0)) + scale_y_discrete(expand = c(0, 0)) + labs(x = "", y = "")
-ggplot2::ggplot(pc1p, aes(x = secondorder, y = Factor)) + geom_tile(aes(fill = Indicator), color = "black") +
-  scale_fill_gradient(low = "black", high = "green") + theme(legend.position = "none",axis.text.x = element_text(size = 5, angle = 45)) +
-  scale_x_discrete(expand = c(0, 0),guide = guide_axis(n.dodge=10)) + scale_y_discrete(expand = c(0, 0)) + labs(x = "", y = "")
+ggplot2::ggplot(pc1p, aes(x =firstorder, y = Factor)) + geom_tile(aes(fill = Indicator), color = "black") +
+  scale_fill_gradient(low = "black", high = "green") + theme(legend.position = "none") +
+  scale_x_discrete(expand = c(0, 0),guide = guide_axis(n.dodge=5)) + scale_y_discrete(expand = c(0, 0)) + labs(x = "", y = "")
 ggplot2::ggplot(pc2p, aes(x = secondorder, y = Factor)) + geom_tile(aes(fill = Indicator), color = "black") +
   scale_fill_gradient(low = "black", high = "green") + theme(legend.position = "none",axis.text.x = element_text(size = 5, angle = 45)) +
   scale_x_discrete(expand = c(0, 0),guide = guide_axis(n.dodge=10)) + scale_y_discrete(expand = c(0, 0)) + labs(x = "", y = "")
 ggplot2::ggplot(pc3p, aes(x = thirdorder, y = Factor)) + geom_tile(aes(fill = Indicator), color = "black") +
   scale_fill_gradientn(colors = c("red", "black", "green"), breaks = c(-1, 0, 1)) + theme(legend.position = "none") +
   scale_x_discrete(expand = c(0, 0)) + scale_y_discrete(expand = c(0, 0)) + labs(x = "", y = "")
+################################################################################
+y_pred <-array(0,dim = c(13,193,15))
+y_pred[which(is.na(y))] <- NA
+count <- 0
+for (i in 1:13) {
+  for(j in 1:193){
+    for(l in 1:15){
+      if(!is.na(zn[i,j,l])){
+        if(zn[i,j,l]==1)
+        y_pred[i,j,l] <- runif(1,mu1n[i]+mu3n[l],mu1n[i]+mu3n[l]+v2n[l])
+      if(zn[i,j,l]==0)
+        y_pred[i,j,l] <- rnorm(1,mu1n[i]+mu3n[l],sqrt(sigma2n[l]))
+      if(zn[i,j,l]==-1)
+        y_pred[i,j,l] <- runif(1,mu1n[i]+mu3n[l]-v1n[l],mu1n[i]+mu3n[l])
+      }
+      
+    }
+  }
+}
+yp <- sapply(yntrack[501:1000], function(x){as.vector(x)})
+yp <- rowMeans(yp,na.rm = TRUE)
+yt <- as.vector(y)
+cor_insample <- var(yp,yt,na.rm=TRUE)/sqrt(var(yp,na.rm = TRUE)*var(yt,na.rm = TRUE))
+res_insample <- sum((yp-yt)^2,na.rm = TRUE)/sum(yt^2,na.rm = TRUE)

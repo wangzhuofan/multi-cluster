@@ -925,30 +925,7 @@ for(i in 1:13){
 
 ```
 
-```{r}
-i <- 1
 
-for(i in 1:28){
-  histogram(as.vector(y[,,7]))
-}
-   
-```
-
-```{r}
-foo <- function() {
-  Rcpp::sourceCpp("rand.cpp", rebuild = F) #assuming Cfoo function is in defined in foo.cpp file
-  randarma1(2)
-}
-library(doRNG)
-library(doSNOW)
-cl <- makeCluster(4)
-registerDoSNOW(cl)
-set.seed(123)
-res <- foreach(i=1:5) %dorng% { foo() }
-set.seed(123)
-res2 <- foreach(i=1:5) %dorng% { foo() }
-stopCluster(cl)
-```
 
 ```{r}
 y_alz <- brain_array[,,alzd]

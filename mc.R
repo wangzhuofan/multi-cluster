@@ -11,7 +11,7 @@
 
 #brain_mat <- read.csv("brain_mat.csv")
 #brain_mat <- as.matrix(brain_mat[,-1])
-#brain_mat <- brain_mat[gcd,]
+
 
 #rm(count_scale)
 
@@ -87,7 +87,7 @@
 #}
 
 #brain_array <- log(brain_array+1)
-#brain_array <- brain_array-mean(brain_array)
+#brain_array <- brain_array-mean(brain_array,na.rm = TRUE)
 
 #bv <- read.csv("brain_array.csv")
 #bv <- bv$x
@@ -124,6 +124,7 @@ rm(depression)
 dep_gene <- read.csv("depression_name.csv")
 dep_gene <- dep_gene$x
 y <- y_dep
+y <- aperm(y_dep,c(2,1,3))
 rm(y_dep)
 library(RcppArmadillo)
 Rcpp::sourceCpp('test1.cpp')
@@ -167,11 +168,11 @@ set.seed(1)
   lambda1 <- matrix(rgamma(d[3]*r,1,1/3),nrow = d[3],byrow = TRUE)
   lambda2 <- lambda1
   #//paramters
-  mu1 <- apply(y, 1, mean)
-  mu1 <- mu1-mu1
-  mu2 <-apply(y, 2, mean)
-  #mu2 <- mu2-mu2
-  mu3 <- apply(y, 3, mean)
+  mu1 <- apply(y, 1, mean,na.rm=TRUE)
+  #mu1 <- mu1-mu1
+  mu2 <-apply(y, 2, mean,na.rm=TRUE)
+  mu2 <- mu2-mu2
+  mu3 <- apply(y, 3, mean,na.rm=TRUE)
   sigma2 <- rep(1,d[3])
   v1 <- 5*sigma2
   v2 <- v1
@@ -185,19 +186,20 @@ set.seed(1)
   #mat sigma2(d[1],d[2],fill::ones);
   #mat b1(d[1],d[2],fill::randn);
   #mat b2(d[1],d[2],fill::randn);
-  m=4;rho=0.3;g=1;
+  m=3;rho=0.3;g=1;
   
   #vec gamma(3,fill::randu);
   gamma <- c(rho/2,1-rho,rho/2)
   #z <- z0
   z <- array(0,dim = d)
+  z[which(is.na(y))] <- NA
 }
   #//MCMC update
 set.seed(2)
 library(progress)
 pb <- progress_bar$new(format = "  complete [:bar] :percent eta: :eta",
-                       total = 10000, clear = FALSE, width= 60)
-  for(it in 1:10000){
+                       total = 5000, clear = FALSE, width= 60)
+  for(it in 1:5000){
     #ztrack[[it]] <- z
     
     
